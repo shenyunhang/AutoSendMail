@@ -1,8 +1,10 @@
+#!/usr/bin/python
 # -*-coding:utf-8-*-
 import os
 import argparse
 import ConfigParser
 import subprocess
+import time
 
 import smtplib
 from email.mime.text import MIMEText
@@ -22,31 +24,6 @@ args = parser.parse_args()
 if not (args.log or args.cmd):
     parser.error('at least one of --log and --cmd required"')
 
-log_path = None
-command = None
-
-
-if args.log is not None and args.cmd is not None:
-    print args.log
-    print args.cmd
-    log_path = args.log
-    command = '{} |tee {}'.format(args.cmd, log_path)
-    subprocess.call(command, shell=True)
-elif args.log is not None:
-    log_path = args.log
-    if not (os.path.exists(log_path) and os.path.isfile(log_path)):
-        print 'log file %s not found' % log_path
-else:
-    log_path = 'log.log'
-    command = '{} |tee {}'.format(args.cmd, log_path)
-    subprocess.call(command, shell=True)
-
-
-if args.cmd is not None:
-    print args.cmd
-    command = '{} |tee'.format(args.cmd)
-    subprocess.call(command, shell=True)
-
 #---------------------------------------------------------------
 # 读取配置文件
 conf_name = 'email.conf'
@@ -60,6 +37,7 @@ config_op = ['smtp_url', 'send_address', 'send_password', 'receive_address']
 config = ConfigParser.ConfigParser()
 config.read(conf_path)
 if not (config.has_section(config_sec[0]) and config.has_section(config_sec[1])):
+    print 'no section %s or %s', config_sec[0], config_sec[1]
     exit(0)
 
 if not config.has_option(config_sec[0], config_op[0]):
@@ -91,14 +69,31 @@ add_to = config.get(config_sec[1], config_op[3])
 # conf_file.close()
 
 #---------------------------------------------------------------
+log_path = args.log
+if log_path is None:
+    now = int(time.time())
+    timeArray = time.localtime(now)
+    # otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    otherStyleTime = time.strftime("%Y%m%d%H%M%S", timeArray)
+    log_path = '{}.log'.format(otherStyleTime)
+
+cmd = args.cmd
+if cmd is not None:
+    # 执行命令
+    cmd_execute = '{} |tee {}'.format(cmd, log_path)
+    subprocess.call(cmd_execute, shell=True)
+
+#---------------------------------------------------------------
 # 初始化邮件
 message = MIMEMultipart()
 
-message['Subject'] = Header('The contents of %s' % log_path, 'utf-8')
+message['Subject'] = Header('End of Program notice: %s' % log_path, 'utf-8')
 message['From'] = Header(add_from, 'utf-8')
 message['To'] = Header(add_to, 'utf-8')
 
-msg = MIMEText('assdddddddddddd', 'plain', 'utf-8')
+maintext = 'command: {}\nlog: {}'.format(cmd, log_path)
+
+msg = MIMEText(maintext, 'plain', 'utf-8')
 message.attach(msg)
 
 #---------------------------------------------------------------
@@ -109,7 +104,8 @@ fp = open(log_path, 'rb')
 # Create a text/plain message
 att1 = MIMEText(fp.read(), 'base64', 'utf-8')
 att1["Content-Type"] = 'application/octet-stream'
-att1["Content-Disposition"] = 'attachment; filename="test.txt"'
+att1[
+    "Content-Disposition"] = 'attachment; filename={}'.format(os.path.split(log_path)[-1])
 fp.close()
 
 message.attach(att1)
