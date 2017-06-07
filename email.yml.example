@@ -1,0 +1,6 @@
+send:
+        smtp_url:
+        send_address:
+        send_password:
+receive:
+        receive_address:
