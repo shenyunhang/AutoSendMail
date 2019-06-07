@@ -1,0 +1,6 @@
+send:
+        smtp_url: smtp.qq.com
+        send_address: 0123456789@qq.com
+        send_password: 0123456789
+receive:
+        receive_address: 0123456789@qq.com

@@ -1,3 +1,4 @@
 email.conf
+email.yml
 *.log
 *.swp

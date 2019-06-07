@@ -15,15 +15,15 @@ sendmail.py -c your-command -l your-log
 If the command requires current shell environment to execute, we can do this by:
 ```bash
 your-command | tee your-log ; sendmail.py -l your-log
-```	
+```
 
 
 ###configure
 
-We need create a simple file named 'email.conf' to configure the email.
+We need create a simple file named 'email.yml' to configure the email.
 
-The email.conf.example provide the template.
+The email.yml.example provide the template.
 ```bash
-cp email.conf.example email.conf
+cp email.yml.example email.yml
 ```
-And then fill the content in email.conf.
+And then fill the content in email.yml.
