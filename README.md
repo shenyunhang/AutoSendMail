@@ -2,7 +2,7 @@
 A tool that automatically sends logs to your mails to notify you when your program ends.
 
 
-###Usage:
+## Usage:
 ```bash
 sendmail.py -c your-command
 ```
@@ -18,7 +18,7 @@ your-command | tee your-log ; sendmail.py -l your-log
 ```
 
 
-###configure
+## configure
 
 We need create a simple file named 'email.yml' to configure the email.
 
