@@ -2,7 +2,7 @@
 # -*-coding:utf-8-*-
 import os
 import argparse
-import ConfigParser
+import configparser
 import subprocess
 import time
 from easydict import EasyDict as edict
