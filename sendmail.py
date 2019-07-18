@@ -5,6 +5,8 @@ import argparse
 import ConfigParser
 import subprocess
 import time
+from easydict import EasyDict as edict
+import yaml
 
 import smtplib
 from email.mime.text import MIMEText
@@ -15,9 +17,18 @@ from email.header import Header
 # 参数处理
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-c', '--cmd', metavar='command', type=str,
-                    help='if provide, the command will be execute and the output will be logged to the log file')
-parser.add_argument('-l', '--log', metavar='log_path', type=str,
+parser.add_argument(
+    '-c',
+    '--cmd',
+    metavar='command',
+    type=str,
+    help=
+    'if provide, the command will be execute and the output will be logged to the log file'
+)
+parser.add_argument('-l',
+                    '--log',
+                    metavar='log_path',
+                    type=str,
                     help='the log file that will be sent to the mail')
 args = parser.parse_args()
 
@@ -26,40 +37,45 @@ if not (args.log or args.cmd):
 
 #---------------------------------------------------------------
 # 读取配置文件
-conf_name = 'email.conf'
+conf_name = 'email.yml'
 self_file_dir = os.path.split(os.path.realpath(__file__))[0]
 # self_file_path = os.path.realpath(__file__)
 conf_path = os.path.join(self_file_dir, conf_name)
 
-config_sec = ['send', 'receive']
-config_op = ['smtp_url', 'send_address', 'send_password', 'receive_address']
+with open(conf_path, 'r') as f:
+    yaml_cfg = edict(yaml.load(f))
+print(yaml_cfg)
+if 'send' not in yaml_cfg:
+    print('configure file no send section!')
+    exit()
 
-config = ConfigParser.ConfigParser()
-config.read(conf_path)
-if not (config.has_section(config_sec[0]) and config.has_section(config_sec[1])):
-    print 'no section %s or %s', config_sec[0], config_sec[1]
-    exit(0)
+if 'receive' not in yaml_cfg:
+    print('configure file no receive section!')
+    exit()
 
-if not config.has_option(config_sec[0], config_op[0]):
-    print 'no %s', config_op[0]
-    exit(0)
-smtp_url = config.get(config_sec[0], config_op[0])
+if 'smtp_url' not in yaml_cfg.send:
+    print('configure file no smtp_url!')
+    exit()
 
-if not config.has_option(config_sec[0], config_op[1]):
-    print 'no %s', config_op[1]
-    exit(0)
-add_from = config.get(config_sec[0], config_op[1])
+if 'send_address' not in yaml_cfg.send:
+    print('configure file no send_address!')
+    exit()
 
+if 'send_password' not in yaml_cfg.send:
+    print('configure file no send_password!')
+    exit()
 
-if not config.has_option(config_sec[0], config_op[2]):
-    print 'no %s', config_op[2]
-    exit(0)
-add_from_pass = config.get(config_sec[0], config_op[2])
+if 'receive_address' not in yaml_cfg.receive:
+    print('configure file no receive_address!')
+    exit()
 
-if not config.has_option(config_sec[1], config_op[3]):
-    print 'no %s', config_op[3]
-    exit(0)
-add_to = config.get(config_sec[1], config_op[3])
+smtp_url = yaml_cfg.send.smtp_url
+
+add_from = yaml_cfg.send.send_address
+
+add_from_pass = yaml_cfg.send.send_password
+
+add_to = yaml_cfg.receive.receive_address
 
 # conf_file = open(conf_path, 'r')
 # smtp_url = conf_file.readline().strip('\n').strip()
@@ -104,8 +120,8 @@ fp = open(log_path, 'rb')
 # Create a text/plain message
 att1 = MIMEText(fp.read(), 'base64', 'utf-8')
 att1["Content-Type"] = 'application/octet-stream'
-att1[
-    "Content-Disposition"] = 'attachment; filename={}'.format(os.path.split(log_path)[-1])
+att1["Content-Disposition"] = 'attachment; filename={}'.format(
+    os.path.split(log_path)[-1])
 fp.close()
 
 message.attach(att1)
