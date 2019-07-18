@@ -23,13 +23,15 @@ parser.add_argument(
     metavar='command',
     type=str,
     help=
-    'if provide, the command will be execute and the output will be logged to the log file'
+    'if provide, the command will be execute and the output will be logged to the log file',
 )
-parser.add_argument('-l',
-                    '--log',
-                    metavar='log_path',
-                    type=str,
-                    help='the log file that will be sent to the mail')
+parser.add_argument(
+    '-l',
+    '--log',
+    metavar='log_path',
+    type=str,
+    help='the log file that will be sent to the mail',
+)
 args = parser.parse_args()
 
 if not (args.log or args.cmd):
