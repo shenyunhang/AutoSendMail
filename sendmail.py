@@ -105,7 +105,7 @@ if cmd is not None:
 # 初始化邮件
 message = MIMEMultipart()
 
-message['Subject'] = Header('End of Program notice: %s' % log_path, 'utf-8')
+message['Subject'] = Header('Task completion notification: %s' % log_path, 'utf-8')
 message['From'] = Header(add_from, 'utf-8')
 message['To'] = Header(add_to, 'utf-8')
 
